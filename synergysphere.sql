@@ -1,2 +1,0 @@
-CREATE DATABASE synergysphere;
-CREATE USER team_user WITH PASSWORD 'dp686';

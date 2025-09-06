@@ -13,7 +13,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 # IMPORTANT: Replace the placeholders with your actual PostgreSQL credentials from the setup guide.
 # Format: 'postgresql://USERNAME:PASSWORD@HOSTNAME/DATABASE_NAME'
 app.config['SQLALCHEMY_DATABASE_URI'] = \
-    'postgresql://team_user:your_password@localhost/synergysphere'
+    'postgresql://team_user:dp686@localhost/synergysphere'
 
 # This silences a deprecation warning
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

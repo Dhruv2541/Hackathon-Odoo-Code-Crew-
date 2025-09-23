@@ -1,5 +1,3 @@
-firebase-functions
-firebase-admin
 Flask
 Flask-SQLAlchemy
 psycopg2-binary

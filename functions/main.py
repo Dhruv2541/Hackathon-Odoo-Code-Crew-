@@ -1,37 +1,31 @@
-# Near the top
+# --- IMPORTS ---
 import os
 from flask import Flask, render_template, request, jsonify
-# ... other imports
+from flask_sqlalchemy import SQLAlchemy
 
-# ... further down
 # --- PATH CONFIGURATION ---
 # This builds an absolute path to the 'Templates' folder, which is necessary for deployment.
 template_dir = os.path.abspath(os.path.dirname(__file__))
 template_folder = os.path.join(template_dir, 'Templates')
 
-# Initialize the Flask application, explicitly telling it where to find templates
+# --- APP INITIALIZATION ---
+# Initialize the Flask application, explicitly telling it where to find templates.
 app = Flask(__name__, template_folder=template_folder)
 
 
-# --- DATABASE CONFIGURATION (IMPROVED) ---
-# This is the most important change.
-# Replace the placeholder text with the "External Database URL" you copied from Render.
+# --- DATABASE CONFIGURATION ---
+# This connects to your Render PostgreSQL database.
 DATABASE_URL = "postgresql://synergysphere_u:Y646b3HqWq24In3ZDxaM2CRQUU0pIwMV@dpg-d3993tc9c44c73antfkg-a.singapore-postgres.render.com/synergysphere"
-
-# Check if the URL is set, otherwise use a default that will intentionally fail
-# This prevents accidentally connecting to a non-existent database.
-if not DATABASE_URL:
-    raise ValueError("No database URL has been provided. Please set it in your code.")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize the database extension
+# Initialize the database extension with the app
 db = SQLAlchemy(app)
 
 
 # --- DATABASE MODELS ---
-# Your original database model classes are unchanged.
+# These classes define the structure of your database tables.
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -59,7 +53,7 @@ class Task(db.Model):
 
 
 # --- WEB & API ROUTES ---
-# All your original routes are unchanged.
+# These are the endpoints for your application.
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -77,7 +71,7 @@ def create_project():
     new_project = Project(name=data['name'])
     db.session.add(new_project)
     db.session.commit()
-    return jsonify(new_project.to_dict()), 210
+    return jsonify(new_project.to_dict()), 201
 
 @app.route('/api/projects/<int:project_id>/tasks', methods=['POST'])
 def create_task(project_id):
@@ -104,16 +98,3 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
     return jsonify({'message': 'Task deleted successfully'})
-
-# --- NOTE ON DATABASE CREATION ---
-# The `db.create_all()` and `app.run()` blocks are correctly removed for deployment.
-# To create your tables for the first time, you will need to run a separate Python
-# script from your local machine that connects to the Render database.
-
-
-# --- CLOUD FUNCTION WRAPPER ---
-# This is the required entry point for Firebase. It wraps your entire Flask app.
-@https_fn.on_request()
-def odoocrew(req: https_fn.Request) -> https_fn.Response:
-    with app.request_context(req.environ):
-        return app.full_dispatch_request()

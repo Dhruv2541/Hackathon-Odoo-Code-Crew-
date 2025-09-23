@@ -1,19 +1,16 @@
-# --- IMPORTS ---
-# Your original imports
+# Near the top
 import os
 from flask import Flask, render_template, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+# ... other imports
 
-# New imports required for Cloud Functions
-from firebase_admin import initialize_app
-from firebase_functions import https_fn
+# ... further down
+# --- PATH CONFIGURATION ---
+# This builds an absolute path to the 'Templates' folder, which is necessary for deployment.
+template_dir = os.path.abspath(os.path.dirname(__file__))
+template_folder = os.path.join(template_dir, 'Templates')
 
-# --- INITIALIZATION ---
-# This is required for the function to run in the Firebase environment
-initialize_app()
-
-# Initialize the Flask application (your original code)
-app = Flask(__name__)
+# Initialize the Flask application, explicitly telling it where to find templates
+app = Flask(__name__, template_folder=template_folder)
 
 
 # --- DATABASE CONFIGURATION (IMPROVED) ---

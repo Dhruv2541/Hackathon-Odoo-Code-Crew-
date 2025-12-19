@@ -480,28 +480,59 @@
         });
     </script>
 
-    <script type="module">
-  // Import the functions you need from the SDKs you need
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { 
+    getAuth, 
+    signInWithPopup, 
+    GoogleAuthProvider, 
+    onAuthStateChanged, 
+    signOut 
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyDpnDUR68bl17HRgfrLKFPeje1L3Qi5p1I",
     authDomain: "test-5bff2.firebaseapp.com",
     projectId: "test-5bff2",
     storageBucket: "test-5bff2.firebasestorage.app",
     messagingSenderId: "820559758291",
-    appId: "1:820559758291:web:6608f29bf15d44a1612526",
-    measurementId: "G-S19BHJ3Q7S"
+    appId: "1:820559758291:web:6608f29bf15d44a1612526"
   };
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // Reference the existing button from your HTML
+  const googleBtn = document.getElementById('google-signup-btn');
+
+  // Handle Google Login
+  googleBtn.addEventListener('click', async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("User logged in:", user.displayName);
+      
+      // Trigger your existing UI logic
+      if (typeof window.handleLogin === 'function') {
+          window.handleLogin();
+      }
+    } catch (error) {
+      console.error("Auth Error:", error.message);
+      alert("Login failed: " + error.message);
+    }
+  });
+
+  // Monitor Auth State (Syncs UI on refresh)
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.isLoggedIn = true;
+      // Update your UI functions here
+    } else {
+      window.isLoggedIn = false;
+    }
+  });
 </script>
 </body>
 </html>

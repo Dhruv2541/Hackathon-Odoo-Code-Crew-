@@ -98,3 +98,13 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
     return jsonify({'message': 'Task deleted successfully'})
+
+@app.route('/api/auth/google', methods=['POST'])
+def google_auth():
+    data = request.get_json()
+    user = User.query.filter_by(email=data['email']).first()
+    if not user:
+        user = User(email=data['email'], name=data['name'], google_id=data['uid'])
+        db.session.add(user)
+        db.session.commit()
+    return jsonify(user.to_dict()), 200

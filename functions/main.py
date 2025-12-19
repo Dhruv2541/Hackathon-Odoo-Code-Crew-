@@ -51,7 +51,30 @@ class Task(db.Model):
             'is_done': self.is_done
         }
 
+# --- DATABASE MODELS ---
+# ... (Project and Task classes are here) ...
 
+class Task(db.Model):
+    # ... existing code ...
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'content': self.content,
+            'is_done': self.is_done
+        }
+
+# --- ADD THE USER MODEL HERE ---
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    google_id = db.Column(db.String(100), unique=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    name = db.Column(db.String(100))
+
+    def to_dict(self):
+        return {'id': self.id, 'email': self.email, 'name': self.name}
+
+# --- WEB & API ROUTES ---
+# ... rest of your code ...
 # --- WEB & API ROUTES ---
 # These are the endpoints for your application.
 @app.route('/')

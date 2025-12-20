@@ -509,20 +509,31 @@
 
   // Handle Google Login
   googleBtn.addEventListener('click', async () => {
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log("User logged in:", user.displayName);
-      
-      // Trigger your existing UI logic
-      if (typeof window.handleLogin === 'function') {
-          window.handleLogin();
-      }
-    } catch (error) {
-      console.error("Auth Error:", error.message);
-      alert("Login failed: " + error.message);
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    // ADD THIS FETCH CALL to sync with your Flask backend
+    await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName
+      })
+    });
+
+    console.log("User synced with backend:", user.displayName);
+    
+    if (typeof window.handleLogin === 'function') {
+        window.handleLogin();
     }
-  });
+  } catch (error) {
+    console.error("Auth Error:", error.message);
+    alert("Login failed: " + error.message);
+  }
+});
 
   // Monitor Auth State (Syncs UI on refresh)
   onAuthStateChanged(auth, (user) => {

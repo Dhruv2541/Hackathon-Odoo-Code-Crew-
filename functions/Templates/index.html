@@ -1,485 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SynergySphere - Team Collaboration</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for a modern look -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Icon Library for navigation icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* Use the Inter font family defined above */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Custom styles for checked tasks */
-        .task-done {
-            text-decoration: line-through;
-            color: #9ca3af; /* gray-400 */
-        }
-        /* Style for modal transitions */
-        .modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal-content {
-            transition: transform 0.3s ease;
-        }
-    </style>
-</head>
-<body class="bg-gray-50 text-gray-800">
-
-    <!-- Navigation Bar -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0">
-                     <h1 class="text-2xl font-bold text-gray-900">
-                        Synergy<span class="text-indigo-600">Sphere</span>
-                    </h1>
-                </div>
-
-                <!-- Main Navigation Links (Visible when logged in) -->
-                <div id="main-nav" class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#home" class="nav-link flex items-center gap-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            <i data-lucide="layout-dashboard"></i> Home
-                        </a>
-                        <a href="#users" class="nav-link flex items-center gap-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            <i data-lucide="users"></i> Users
-                        </a>
-                        <a href="#projects" class="nav-link flex items-center gap-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                             <i data-lucide="kanban-square"></i> Projects
-                        </a>
-                        <a href="#profile" class="nav-link flex items-center gap-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                             <i data-lucide="user-circle"></i> Profile
-                        </a>
-                    </div>
-                </div>
-
-                <div class="flex items-center">
-                    <div id="auth-logged-out" class="flex items-center gap-3">
-                        <button id="nav-login-btn" class="px-4 py-2 text-sm font-medium text-gray-600 bg-transparent rounded-lg hover:bg-gray-100 transition-colors">Log In</button>
-                        <button id="nav-signup-btn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">Sign Up</button>
-                    </div>
-                    <div id="auth-logged-in" class="hidden">
-                         <button id="logout-btn" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Logout</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-    
-    <!-- Login Modal -->
-    <div id="login-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 invisible opacity-0 z-50">
-        <div class="modal-content bg-white w-full max-w-md p-8 rounded-2xl shadow-xl transform scale-95">
-            <h2 class="text-2xl font-bold text-center mb-2">Welcome Back!</h2>
-            <p class="text-center text-gray-500 mb-6">Log in to continue to SynergySphere.</p>
-            <form id="login-form">
-                <div class="mb-4">
-                    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input type="email" id="login-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                </div>
-                <div class="mb-6">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="login-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-lg hover:bg-indigo-700 transition-colors">Log In</button>
-            </form>
-            <p class="text-center text-sm text-gray-500 mt-6">
-                Don't have an account? <button id="switch-to-signup" class="font-medium text-indigo-600 hover:underline">Sign up</button>
-            </p>
-        </div>
-    </div>
-
-    <!-- Signup Modal -->
-    <div id="signup-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 invisible opacity-0 z-50">
-        <div class="modal-content bg-white w-full max-w-md p-8 rounded-2xl shadow-xl transform scale-95">
-            <h2 class="text-2xl font-bold text-center mb-2">Create Your Account</h2>
-            <p class="text-center text-gray-500 mb-6">Join SynergySphere to start collaborating.</p>
-            <form id="signup-form">
-                <button type="button" id="google-signup-btn" class="w-full flex items-center justify-center gap-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors mb-4">
-                    <svg class="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.901,35.636,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
-                    Continue with Google
-                </button>
-                <div class="relative flex py-2 items-center">
-                    <div class="flex-grow border-t border-gray-200"></div>
-                    <span class="flex-shrink mx-4 text-gray-400 text-sm">OR</span>
-                    <div class="flex-grow border-t border-gray-200"></div>
-                </div>
-                <div class="mb-4">
-                    <label for="signup-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <input type="email" id="signup-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                </div>
-                <div class="mb-4">
-                    <label for="signup-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="signup-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white font-semibold py-2.5 rounded-lg hover:bg-indigo-700 transition-colors">Create Account</button>
-            </form>
-            <p class="text-center text-sm text-gray-500 mt-6">
-                Already have an account? <button id="switch-to-login" class="font-medium text-indigo-600 hover:underline">Log in</button>
-            </p>
-        </div>
-    </div>
-    
-    <!-- MAIN CONTENT -->
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        <!-- Welcome Screen (Visible when logged out) -->
-        <div id="welcome-screen">
-             <div class="text-center py-20">
-                <h2 class="text-4xl sm:text-5xl font-bold text-gray-900">Welcome to SynergySphere</h2>
-                <p class="mt-4 text-lg text-gray-500">Your all-in-one platform for seamless team collaboration.</p>
-                <div class="mt-8">
-                    <button id="get-started-btn" class="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        Get Started
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main App Content (Visible when logged in) -->
-        <main id="app-content" class="hidden">
-            
-            <!-- PAGE: Home -->
-            <div id="page-home" class="page-content">
-                <header class="text-left mb-10">
-                    <h1 class="text-3xl font-bold text-gray-900">Home Dashboard</h1>
-                    <p class="mt-1 text-md text-gray-500">An overview of your team's activity.</p>
-                </header>
-                <div class="bg-white p-8 rounded-xl shadow-md">
-                    <h2 class="text-xl font-semibold">Welcome to your dashboard!</h2>
-                    <p class="mt-2 text-gray-600">Navigate using the links above to see projects, users, and your profile.</p>
-                </div>
-            </div>
-
-            <!-- PAGE: Users -->
-            <div id="page-users" class="page-content hidden">
-                 <header class="text-left mb-10">
-                    <h1 class="text-3xl font-bold text-gray-900">User Management</h1>
-                    <p class="mt-1 text-md text-gray-500">A list of all users in the system.</p>
-                </header>
-                <div id="users-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- User cards will be dynamically inserted here -->
-                </div>
-            </div>
-
-            <!-- PAGE: Projects -->
-            <div id="page-projects" class="page-content hidden">
-                <header class="text-left mb-10">
-                    <h1 class="text-3xl font-bold text-gray-900">Project Dashboard</h1>
-                    <p class="mt-1 text-md text-gray-500">Manage your team's projects and tasks below.</p>
-                </header>
-                <div class="max-w-xl mb-10 bg-white p-6 rounded-xl shadow-md">
-                    <h2 class="text-xl font-semibold mb-4">Create a New Project Board</h2>
-                    <form id="new-project-form" class="flex flex-col sm:flex-row gap-3">
-                        <input type="text" id="project-name-input" placeholder="Enter new project name..." class="flex-grow w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        <button type="submit" class="w-full sm:w-auto bg-indigo-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                            Create Project
-                        </button>
-                    </form>
-                </div>
-                <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    <!-- Project cards will be dynamically inserted here -->
-                </div>
-            </div>
-
-            <!-- PAGE: Profile -->
-            <div id="page-profile" class="page-content hidden">
-                <header class="text-left mb-10">
-                    <h1 class="text-3xl font-bold text-gray-900">Your Profile</h1>
-                    <p class="mt-1 text-md text-gray-500">Manage your account settings.</p>
-                </header>
-                <div class="bg-white p-8 rounded-xl shadow-md">
-                    <h2 class="text-xl font-semibold">Profile page is under construction!</h2>
-                    <p class="mt-2 text-gray-600">Your user profile settings would go here.</p>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- DOM ELEMENT SELECTION ---
-            const pageContents = document.querySelectorAll('.page-content');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const welcomeScreen = document.getElementById('welcome-screen');
-            const appContent = document.getElementById('app-content');
-            const mainNav = document.getElementById('main-nav');
-            const authLoggedOut = document.getElementById('auth-logged-out');
-            const authLoggedIn = document.getElementById('auth-logged-in');
-            const loginModal = document.getElementById('login-modal');
-            const signupModal = document.getElementById('signup-modal');
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            const navLoginBtn = document.getElementById('nav-login-btn');
-            const navSignupBtn = document.getElementById('nav-signup-btn');
-            const getStartedBtn = document.getElementById('get-started-btn');
-            const logoutButton = document.getElementById('logout-btn');
-            const switchToSignupBtn = document.getElementById('switch-to-signup');
-            const switchToLoginBtn = document.getElementById('switch-to-login');
-            const googleSignupBtn = document.getElementById('google-signup-btn');
-            const projectsContainer = document.getElementById('projects-container');
-            const usersContainer = document.getElementById('users-container');
-            const newProjectForm = document.getElementById('new-project-form');
-            const projectNameInput = document.getElementById('project-name-input');
-            const API_BASE_URL = '';
-            let isLoggedIn = false;
-
-            // --- CORE FUNCTIONS ---
-
-            function showPage(pageId) {
-                pageContents.forEach(page => page.classList.add('hidden'));
-                const targetPage = document.getElementById(`page-${pageId}`);
-                if (targetPage) targetPage.classList.remove('hidden');
-
-                navLinks.forEach(link => {
-                    link.classList.remove('bg-indigo-50', 'text-indigo-700');
-                    link.classList.add('text-gray-500');
-                    if (link.getAttribute('href') === `#${pageId}`) {
-                        link.classList.add('bg-indigo-50', 'text-indigo-700');
-                        link.classList.remove('text-gray-500');
-                    }
-                });
-            }
-
-            function handleRouteChange() {
-                const hash = window.location.hash.substring(1) || 'home';
-                showPage(hash);
-                if (isLoggedIn) {
-                    if (hash === 'projects') fetchAndRenderProjects();
-                    if (hash === 'users') fetchAndRenderUsers();
-                }
-            }
-
-            function updateUIForAuthState() {
-                if (isLoggedIn) {
-                    welcomeScreen.classList.add('hidden');
-                    appContent.classList.remove('hidden');
-                    mainNav.classList.remove('hidden');
-                    authLoggedOut.classList.add('hidden');
-                    authLoggedIn.classList.remove('hidden');
-                } else {
-                    welcomeScreen.classList.remove('hidden');
-                    appContent.classList.add('hidden');
-                    mainNav.classList.add('hidden');
-                    authLoggedOut.classList.remove('hidden');
-                    authLoggedIn.classList.add('hidden');
-                    window.location.hash = '';
-                }
-            }
-            
-            function openModal(modal) {
-                modal.classList.remove('invisible', 'opacity-0');
-                modal.querySelector('.modal-content').classList.remove('scale-95');
-            }
-
-            function closeModal(modal) {
-                modal.classList.add('invisible', 'opacity-0');
-                modal.querySelector('.modal-content').classList.add('scale-95');
-            }
-
-            function handleLogin() {
-                isLoggedIn = true;
-                closeModal(loginModal);
-                closeModal(signupModal);
-                updateUIForAuthState();
-                window.location.hash = '#home'; // Start at home after login
-                handleRouteChange();
-            }
-
-            function handleLogout() {
-                isLoggedIn = false;
-                updateUIForAuthState();
-            }
-
-            // --- API & RENDERING FUNCTIONS ---
-            
-            async function fetchAndRenderUsers() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/users`);
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    const users = await response.json();
-                    
-                    usersContainer.innerHTML = ''; // Clear previous content
-                    users.forEach(user => {
-                        const userCard = document.createElement('div');
-                        userCard.className = 'bg-white p-4 rounded-lg shadow-md flex items-center space-x-4';
-                        userCard.innerHTML = `
-                            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
-                                <span class="text-xl font-bold text-indigo-600">${user.name.charAt(0)}</span>
-                            </div>
-                            <div>
-                                <p class="font-semibold text-gray-800">${user.name}</p>
-                                <p class="text-sm text-gray-500">${user.email}</p>
-                            </div>
-                        `;
-                        usersContainer.appendChild(userCard);
-                    });
-
-                } catch (error) {
-                    console.error('Failed to fetch users:', error);
-                    usersContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">Error loading users.</p>`;
-                }
-            }
-
-            async function fetchAndRenderProjects() {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/projects`);
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    const projects = await response.json();
-                    renderProjects(projects);
-                } catch (error) {
-                    console.error('Failed to fetch projects:', error);
-                    projectsContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">Error loading projects.</p>`;
-                }
-            }
-
-            async function createProject(name) {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/projects`, {
-                        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name }),
-                    });
-                    if (!response.ok) throw new Error('Failed to create project');
-                    fetchAndRenderProjects();
-                } catch (error) { console.error('Error creating project:', error); }
-            }
-            
-            async function createTask(projectId, content) {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}/tasks`, {
-                        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ content }),
-                    });
-                    if (!response.ok) throw new Error('Failed to create task');
-                    fetchAndRenderProjects();
-                } catch (error) { console.error('Error creating task:', error); }
-            }
-
-            async function updateTaskStatus(taskId, isDone) {
-                try {
-                    await fetch(`${API_BASE_URL}/api/tasks/${taskId}`, {
-                        method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ is_done: isDone }),
-                    });
-                    // No need to re-fetch, parent function will handle it if needed
-                } catch (error) { console.error('Error updating task:', error); }
-            }
-
-            async function deleteTask(taskId) {
-                try {
-                    await fetch(`${API_BASE_URL}/api/tasks/${taskId}`, { method: 'DELETE' });
-                    fetchAndRenderProjects();
-                } catch (error) { console.error('Error deleting task:', error); }
-            }
-
-            function renderProjects(projects) {
-                if (projects.length === 0) {
-                    projectsContainer.innerHTML = `<div class="col-span-full text-center py-12"><h3 class="text-2xl font-semibold text-gray-500">No Projects Yet!</h3><p class="text-gray-400 mt-2">Use the form above to create your first project board.</p></div>`;
-                    return;
-                }
-                projectsContainer.innerHTML = '';
-                projects.forEach(project => {
-                    const projectCard = document.createElement('div');
-                    projectCard.className = 'bg-white rounded-xl shadow-md p-6 flex flex-col';
-                    projectCard.innerHTML = `
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">${project.name}</h3>
-                        <div class="space-y-3 mb-4 flex-grow">
-                            ${project.tasks.length > 0 ? project.tasks.map(task => renderTask(task)).join('') : '<p class="text-gray-400">No tasks yet.</p>'}
-                        </div>
-                        <form class="add-task-form mt-auto flex gap-2" data-project-id="${project.id}">
-                            <input type="text" placeholder="Add new task..." class="task-content-input flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" required>
-                            <button type="submit" class="bg-indigo-500 text-white px-3 py-2 rounded-md hover:bg-indigo-600 text-sm font-semibold transition-colors">+</button>
-                        </form>`;
-                    projectsContainer.appendChild(projectCard);
-                });
-            }
-
-            function renderTask(task) {
-                return `
-                    <div class="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-                        <div class="flex items-center">
-                            <input type="checkbox" class="task-checkbox h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" data-task-id="${task.id}" ${task.is_done ? 'checked' : ''}>
-                            <label class="ml-3 ${task.is_done ? 'task-done' : ''}">${task.content}</label>
-                        </div>
-                        <button class="delete-task-btn text-gray-400 hover:text-red-500" data-task-id="${task.id}">
-                            <i data-lucide="trash-2" class="w-4 h-4 pointer-events-none"></i>
-                        </button>
-                    </div>`;
-            }
-
-            // --- EVENT LISTENERS ---
-            window.addEventListener('hashchange', handleRouteChange);
-            
-            navLoginBtn.addEventListener('click', () => openModal(loginModal));
-            navSignupBtn.addEventListener('click', () => openModal(signupModal));
-            getStartedBtn.addEventListener('click', () => openModal(signupModal));
-            
-            loginModal.addEventListener('click', (e) => e.target === loginModal && closeModal(loginModal));
-            signupModal.addEventListener('click', (e) => e.target === signupModal && closeModal(signupModal));
-
-            switchToSignupBtn.addEventListener('click', () => { closeModal(loginModal); openModal(signupModal); });
-            switchToLoginBtn.addEventListener('click', () => { closeModal(signupModal); openModal(loginModal); });
-
-            loginForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
-            signupForm.addEventListener('submit', (e) => { e.preventDefault(); handleLogin(); });
-            googleSignupBtn.addEventListener('click', handleLogin);
-            logoutButton.addEventListener('click', handleLogout);
-
-            newProjectForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const projectName = projectNameInput.value.trim();
-                if (projectName) {
-                    createProject(projectName);
-                    projectNameInput.value = '';
-                }
-            });
-            
-            projectsContainer.addEventListener('submit', (e) => {
-                if (e.target.classList.contains('add-task-form')) {
-                    e.preventDefault();
-                    const projectId = e.target.dataset.projectId;
-                    const input = e.target.querySelector('.task-content-input');
-                    const content = input.value.trim();
-                    if (content) {
-                        createTask(projectId, content);
-                        input.value = '';
-                    }
-                }
-            });
-
-            projectsContainer.addEventListener('change', (e) => {
-                if (e.target.classList.contains('task-checkbox')) {
-                    const taskId = e.target.dataset.taskId;
-                    const isDone = e.target.checked;
-                    updateTaskStatus(taskId, isDone);
-                    // Optimistically update UI
-                    e.target.nextElementSibling.classList.toggle('task-done', isDone);
-                }
-            });
-
-            projectsContainer.addEventListener('click', (e) => {
-                if (e.target.closest('.delete-task-btn')) {
-                    const button = e.target.closest('.delete-task-btn');
-                    const taskId = button.dataset.taskId;
-                    // Using standard confirm for simplicity in a hackathon context
-                    if (confirm('Are you sure you want to delete this task?')) {
-                        deleteTask(taskId);
-                    }
-                }
-            });
-            
-            // --- INITIALIZATION ---
-            lucide.createIcons();
-            updateUIForAuthState();
-            handleRouteChange();
-        });
-    </script>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
   import { 
@@ -490,6 +8,7 @@
     signOut 
   } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
+  // Your web app's Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyDpnDUR68bl17HRgfrLKFPeje1L3Qi5p1I",
     authDomain: "test-5bff2.firebaseapp.com",
@@ -504,46 +23,60 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  // Reference the existing button from your HTML
+  // Make auth methods available to the other script
+  window.firebase = { auth: { getAuth, signOut } };
+
   const googleBtn = document.getElementById('google-signup-btn');
 
   // Handle Google Login
   googleBtn.addEventListener('click', async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-    // ADD THIS FETCH CALL to sync with your Flask backend
-    await fetch('/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName
-      })
-    });
-
-    console.log("User synced with backend:", user.displayName);
-    
-    if (typeof window.handleLogin === 'function') {
-        window.handleLogin();
+      // Sync with Flask backend and get full user object
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName
+        })
+      });
+      const backendUser = await response.json();
+      
+      if (typeof window.handleLogin === 'function') {
+          window.handleLogin(backendUser); // Pass full user object from our DB
+      }
+    } catch (error) {
+      console.error("Auth Error:", error.message);
+      alert("Login failed: " + error.message);
     }
-  } catch (error) {
-    console.error("Auth Error:", error.message);
-    alert("Login failed: " + error.message);
-  }
-});
+  });
 
-  // Monitor Auth State (Syncs UI on refresh)
-  onAuthStateChanged(auth, (user) => {
+  // Monitor Auth State
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
-      window.isLoggedIn = true;
-      // Update your UI functions here
+        // User is signed in, re-sync with backend to get our user object
+        const response = await fetch('/api/auth/google', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                uid: user.uid,
+                email: user.email,
+                name: user.displayName
+            })
+        });
+        const backendUser = await response.json();
+        if (typeof window.handleLogin === 'function') {
+            window.handleLogin(backendUser);
+        }
     } else {
-      window.isLoggedIn = false;
+      // User is signed out.
+      if (typeof window.handleLogout === 'function') {
+        window.handleLogout();
+      }
     }
   });
 </script>
-</body>
-</html>

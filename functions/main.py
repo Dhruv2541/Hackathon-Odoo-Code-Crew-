@@ -15,24 +15,27 @@ app = Flask(__name__, template_folder=template_folder)
 
 
 # --- DATABASE CONFIGURATION ---
-# This connects to your Render PostgreSQL database.
-# This looks for the Render environment variable first
-DATABASE_URL = os.environ.get('DATABASE_URL', "postgresql://synergysphere_u:Y646b3HqWq24In3ZDxaM2CRQUU0pIwMV@dpg-d3993tc9c44c73antfkg-a.singapore-postgres.render.com/synergysphere?sslmode=require")
-# Update line 18 in main.py
-DATABASE_URL = "postgresql://synergysphere_u:Y646b3HqWq24In3ZDxaM2CRQUU0pIwMV@dpg-d3993tc9c44c73antfkg-a.singapore-postgres.render.com/synergysphere?sslmode=require"
+# Use Environment Variable if available (Render), otherwise fallback to the hardcoded string (Local)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if not DATABASE_URL:
+    DATABASE_URL = "postgresql://synergysphere_u:Y646b3HqWq24In3ZDxaM2CRQUU0pIwMV@dpg-d3993tc9c44c73antfkg-a.singapore-postgres.render.com/synergysphere?sslmode=require"
+
+# Ensure the URL starts with 'postgresql://' for SQLAlchemy compatibility
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Add this extra block for secure connections
+# REQUIRED for Render production stability
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
     "connect_args": {
         "sslmode": "require"
-    }
+    },
+    "pool_pre_ping": True, # Checks connection health before using it
 }
-# Initialize the database extension with the app
-db = SQLAlchemy(app)
 
+db = SQLAlchemy(app)
 
 # --- DATABASE MODELS ---
 # These classes define the structure of your database tables.

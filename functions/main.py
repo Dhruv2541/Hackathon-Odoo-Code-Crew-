@@ -131,3 +131,13 @@ def google_auth():
         db.session.add(user)
         db.session.commit()
     return jsonify(user.to_dict()), 200
+
+# --- TEMPORARY INITIALIZATION ROUTE ---
+@app.route('/api/init-db')
+def init_db():
+    try:
+        # This command creates the Project, Task, and User tables in PostgreSQL
+        db.create_all()
+        return "Database tables created successfully! You can now use Google Login.", 200
+    except Exception as e:
+        return f"Error: {str(e)}", 500

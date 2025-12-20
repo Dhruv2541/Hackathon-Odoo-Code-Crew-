@@ -16,6 +16,8 @@ app = Flask(__name__, template_folder=template_folder)
 
 # --- DATABASE CONFIGURATION ---
 # This connects to your Render PostgreSQL database.
+# This looks for the Render environment variable first
+DATABASE_URL = os.environ.get('DATABASE_URL', "postgresql://synergysphere_u:Y646b3HqWq24In3ZDxaM2CRQUU0pIwMV@dpg-d3993tc9c44c73antfkg-a.singapore-postgres.render.com/synergysphere?sslmode=require")
 # Update line 18 in main.py
 DATABASE_URL = "postgresql://synergysphere_u:Y646b3HqWq24In3ZDxaM2CRQUU0pIwMV@dpg-d3993tc9c44c73antfkg-a.singapore-postgres.render.com/synergysphere?sslmode=require"
 
